@@ -19,20 +19,10 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: pip install -r "Lab 1/requirements.txt"
 
       - name: Train Models
-        run: python src/train.py
+        run: python "Lab 1/src/train.py"
 
       - name: Evaluate Models
-        run: python src/evaluate.py
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: model-artifacts
-          path: |
-            models/
-            metrics/
+        run: python "Lab 1/src/evaluate.py"
