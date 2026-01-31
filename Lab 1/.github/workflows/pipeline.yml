@@ -2,7 +2,7 @@ name: MLOps Pipeline
 
 on:
   push:
-    branches: [ main, lab-1 ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
