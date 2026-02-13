@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  job-ats-matcher:
+    build: .
+    container_name: job-ats-matcher
+    ports:
+      - "8080:8080"  # Airflow webserver
+      - "8501:8501"  # Streamlit
+    volumes:
+      - ./data:/app/data
+      - ./dags:/app/dags
+    environment:
+      - AIRFLOW_HOME=/app
+      - AIRFLOW__CORE__DAGS_FOLDER=/app/dags
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    env_file:
+      - .env
+    restart: unless-stopped

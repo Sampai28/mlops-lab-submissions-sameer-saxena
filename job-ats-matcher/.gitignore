@@ -7,14 +7,16 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
 
 # Data files
 data/jobs.csv
 data/resume.pdf
 data/results.json
-# But keep data folder structure
+
+# Keep data folder structure
 !data/.gitkeep
-!data/README.md
 !data/skills_list.txt
 
 # Airflow
@@ -22,6 +24,8 @@ airflow.db
 airflow.cfg
 logs/
 airflow-webserver.pid
+airflow-scheduler.pid
+standalone_admin_password.txt
 
 # Environment
 .env

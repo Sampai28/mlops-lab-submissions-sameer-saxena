@@ -1,21 +1,24 @@
-# Airflow
-apache-airflow==2.8.0
+# Airflow - compatible version
+apache-airflow==2.9.3
 
 # Streamlit  
-streamlit==1.30.0
+streamlit
 
 # Data processing
-pandas==2.1.0
-numpy==1.25.0
+pandas
+numpy
 
 # PDF processing
-PyPDF2==3.0.0
+PyPDF2
 
 # API requests
-requests==2.31.0
+requests
 
 # Environment variables
-python-dotenv==1.0.0
+python-dotenv
 
 # Utilities
-python-dateutil==2.8.2
+python-dateutil
+
+# Fix dependency conflicts
+fastapi>=0.115.0
