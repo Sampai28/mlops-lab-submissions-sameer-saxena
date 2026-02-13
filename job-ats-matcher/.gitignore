@@ -1,0 +1,37 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data files
+data/jobs.csv
+data/resume.pdf
+data/results.json
+# But keep data folder structure
+!data/.gitkeep
+!data/README.md
+!data/skills_list.txt
+
+# Airflow
+airflow.db
+airflow.cfg
+logs/
+airflow-webserver.pid
+
+# Environment
+.env
+.kaggle/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
