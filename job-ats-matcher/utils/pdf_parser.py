@@ -1,6 +1,4 @@
-"""
-PDF Parser - Extracts text from PDF resumes
-"""
+
 import PyPDF2
 import logging
 
@@ -9,15 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_text_from_pdf(pdf_path):
-    """
-    Extract text content from a PDF file
-    
-    Args:
-        pdf_path: Path to PDF file
-    
-    Returns:
-        str: Extracted text content
-    """
+
     try:
         text = ""
         
@@ -25,33 +15,25 @@ def extract_text_from_pdf(pdf_path):
             pdf_reader = PyPDF2.PdfReader(file)
             num_pages = len(pdf_reader.pages)
             
-            logger.info(f"Processing {num_pages} pages from {pdf_path}")
+            logger.info(f"Processing {num_pages} pages")
             
             for page_num in range(num_pages):
                 page = pdf_reader.pages[page_num]
                 text += page.extract_text()
         
-        logger.info(f"Extracted {len(text)} characters from PDF")
+        logger.info(f"Extracted {len(text)} characters")
         return text
     
     except FileNotFoundError:
-        logger.error(f"File not found: {pdf_path}")
+        logger.error(f"File not found")
         return ""
     except Exception as e:
-        logger.error(f"Error extracting text from PDF: {e}")
+        logger.error(f"Error {e}")
         return ""
 
 
 def clean_text(text):
-    """
-    Clean extracted text (remove extra whitespace, etc.)
-    
-    Args:
-        text: Raw text
-    
-    Returns:
-        str: Cleaned text
-    """
+
     if not text:
         return ""
     
@@ -68,12 +50,11 @@ if __name__ == "__main__":
     pdf_path = "data/resume.pdf"
     
     if os.path.exists(pdf_path):
-        print(f"Testing PDF extraction on: {pdf_path}")
+        print(f"Testing PDF extraction")
         text = extract_text_from_pdf(pdf_path)
         cleaned = clean_text(text)
         
         print(f"\nExtracted text (first 500 chars):")
         print(cleaned[:500])
     else:
-        print(f"No test PDF found at {pdf_path}")
-        print("Upload a resume PDF to data/resume.pdf to test")
+        print(f"No test PDF found")

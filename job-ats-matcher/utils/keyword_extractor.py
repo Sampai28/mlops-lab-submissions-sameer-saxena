@@ -1,13 +1,6 @@
-"""
-Keyword Extractor - Extracts technical skills from text
-"""
+
 import re
-import logging
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Predefined technical skills list
 TECHNICAL_SKILLS = {
     # Programming Languages
     'python', 'java', 'javascript', 'typescript', 'c++', 'c#', 'ruby', 'php', 
@@ -43,75 +36,45 @@ TECHNICAL_SKILLS = {
 
 
 def extract_keywords(text, skills_list=None):
-    """
-    Extract keywords from text based on predefined skills list
-    
-    Args:
-        text: Input text (job description or resume)
-        skills_list: Optional custom skills list, defaults to TECHNICAL_SKILLS
-    
-    Returns:
-        set: Set of matched keywords
-    """
+
+    # Handle empty text
     if not text:
         return set()
     
+    # Use default skills list if none provided
     if skills_list is None:
         skills_list = TECHNICAL_SKILLS
     
-    # Convert text to lowercase for matching
+    # Convert text to lowercase for case-insensitive matching
     text_lower = text.lower()
     
-    # Find matching skills
-    matched_keywords = set()
+    # Find which skills appear in the text
+    found_skills = set()
     
     for skill in skills_list:
-        # Use word boundaries to match whole words
-        # e.g., 'r' should match ' R ' or 'R,' but not 'for' 
+        # Use regex to match whole words only
+        # This prevents matching 'r' in 'for' or 'go' in 'good'
         pattern = r'\b' + re.escape(skill) + r'\b'
+        
         if re.search(pattern, text_lower):
-            matched_keywords.add(skill)
+            found_skills.add(skill)
     
-    return matched_keywords
+    return found_skills
 
 
 def calculate_match_score(resume_keywords, job_keywords):
-    """
-    Calculate match percentage between resume and job keywords
-    
-    Args:
-        resume_keywords: set of keywords from resume
-        job_keywords: set of keywords from job description
-    
-    Returns:
-        tuple: (match_score, matched_keywords, missing_keywords)
-    """
+
+    # Handle case where job has no keywords
     if not job_keywords:
         return 0, set(), set()
     
-    matched = resume_keywords & job_keywords  # Intersection
-    missing = job_keywords - resume_keywords  # In job but not in resume
+    # Find skills that match
+    matched = resume_keywords & job_keywords
     
+    # Find skills the job wants but resume doesn't have
+    missing = job_keywords - resume_keywords
+    
+    # Calculate percentage: (matched skills / total job skills) * 100
     score = (len(matched) / len(job_keywords)) * 100
     
     return round(score, 2), matched, missing
-
-
-if __name__ == "__main__":
-    # Test keyword extraction
-    sample_text = """
-    We are looking for a Data Analyst with strong Python and SQL skills.
-    Experience with Tableau and AWS is a plus. Strong communication skills required.
-    """
-    
-    keywords = extract_keywords(sample_text)
-    print(f"Extracted keywords: {keywords}")
-    
-    # Test matching
-    resume_keywords = {'python', 'sql', 'excel', 'tableau'}
-    job_keywords = {'python', 'sql', 'aws', 'tableau', 'communication'}
-    
-    score, matched, missing = calculate_match_score(resume_keywords, job_keywords)
-    print(f"\nMatch Score: {score}%")
-    print(f"Matched: {matched}")
-    print(f"Missing: {missing}")
