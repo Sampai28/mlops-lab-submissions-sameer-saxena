@@ -4,6 +4,8 @@ An MLOps pipeline that fetches job postings, analyzes resumes, and calculates AT
 
 ## Overview
 
+This project initially started with a static dataset from Kaggle ([Job Descriptions Dataset](https://www.kaggle.com/datasets/jayakishan225/job-descriptions-dataset)). However, to make the system more dynamic and practical, I integrated the JSearch API to fetch real-time job postings. This allows users to get fresh, current job listings instead of working with static historical data.
+
 This system:
 - Fetches real job postings from JSearch API
 - Extracts keywords from job descriptions and resumes
