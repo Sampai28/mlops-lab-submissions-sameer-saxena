@@ -1,6 +1,4 @@
-"""
-Job Matcher DAG - Airflow pipeline for job matching
-"""
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
@@ -29,13 +27,12 @@ default_args = {
 
 
 def fetch_and_save_jobs(**context):
-    """Task 1: Fetch jobs from API and save to CSV"""
     # Get parameters from DAG run config or use defaults
     query = context['dag_run'].conf.get('query', 'Data Analyst')
     location = context['dag_run'].conf.get('location', 'Remote')
     num_jobs = context['dag_run'].conf.get('num_jobs', 20)
     
-    print(f"Fetching jobs: {query} in {location} (limit: {num_jobs})")
+    print("Fetching jobs:", query, "in", location, "limit:", num_jobs)
     
     jobs_df = fetch_jobs_from_api(query=query, location=location, num_jobs=num_jobs)
     
@@ -43,13 +40,12 @@ def fetch_and_save_jobs(**context):
         raise ValueError("No jobs fetched from API")
     
     save_jobs_to_csv(jobs_df)
-    print(f"Successfully fetched and saved {len(jobs_df)} jobs")
+    print("Successfully fetched", len(jobs_df), "jobs")
     
     return len(jobs_df)
 
 
 def extract_job_keywords(**context):
-    """Task 2: Extract keywords from all job descriptions"""
     jobs_df = load_jobs_from_csv()
     
     if jobs_df.empty:
@@ -62,17 +58,16 @@ def extract_job_keywords(**context):
     
     # Save updated dataframe
     save_jobs_to_csv(jobs_df)
-    print(f"Extracted keywords for {len(jobs_df)} jobs")
+    print("Extracted keywords for", len(jobs_df), "jobs")
     
     return len(jobs_df)
 
 
 def process_resume(**context):
-    """Task 3: Extract text and keywords from resume"""
     resume_path = 'data/resume.pdf'
     
     if not os.path.exists(resume_path):
-        raise FileNotFoundError(f"Resume not found at {resume_path}")
+        raise FileNotFoundError("Resume not found)
     
     # Extract text from PDF
     text = extract_text_from_pdf(resume_path)
@@ -84,8 +79,8 @@ def process_resume(**context):
     # Extract keywords
     resume_keywords = extract_keywords(cleaned_text)
     
-    print(f"Extracted {len(resume_keywords)} keywords from resume")
-    print(f"Keywords: {resume_keywords}")
+    print("Extracted", len(resume_keywords), "keywords from resume")
+    print("Keywords:", resume_keywords)
     
     # Push to XCom for next task
     context['task_instance'].xcom_push(key='resume_keywords', value=list(resume_keywords))
@@ -94,7 +89,6 @@ def process_resume(**context):
 
 
 def calculate_matches(**context):
-    """Task 4: Calculate match scores between resume and jobs"""
     # Get resume keywords from previous task
     resume_keywords = set(context['task_instance'].xcom_pull(
         task_ids='process_resume', 
@@ -124,7 +118,7 @@ def calculate_matches(**context):
         score, matched, missing = calculate_match_score(resume_keywords, job_keywords)
         
         results.append({
-            'rank': 0,  # Will be set after sorting
+            'rank': 0,
             'job_title': row['job_title'],
             'company': row['company'],
             'location': row['location'],
@@ -132,7 +126,7 @@ def calculate_matches(**context):
             'matched_keywords': list(matched),
             'missing_keywords': list(missing),
             'job_url': row['job_url'],
-            'description': row['description'][:500]  # Truncate for display
+            'description': row['description'][:500]
         })
     
     # Sort by match score
@@ -147,8 +141,8 @@ def calculate_matches(**context):
     with open(results_path, 'w') as f:
         json.dump(results, f, indent=2)
     
-    print(f"Calculated matches for {len(results)} jobs")
-    print(f"Top match: {results[0]['job_title']} ({results[0]['match_score']}%)")
+    print("Calculated matches for", len(results), "jobs")
+    print("Top match:", results[0]['job_title'], "with score", results[0]['match_score'], "%")
     
     return len(results)
 
@@ -158,7 +152,7 @@ with DAG(
     'job_matcher_pipeline',
     default_args=default_args,
     description='Job matching pipeline with resume ATS scoring',
-    schedule_interval=None,  # Manual trigger only
+    schedule_interval=None, 
     start_date=datetime(2024, 1, 1),
     catchup=False,
     tags=['job-matching', 'ats'],

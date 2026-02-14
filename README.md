@@ -115,4 +115,6 @@ I acknowledge that AI tools (Claude) were used during the development of this pr
 - Improve Streamlit UI
 - Generate documentation and comments
 
+Initially, my plan was to use a static dataset from Kaggle. However, Claude suggested I could make the project more dynamic and personalized by using the JSearch API to fetch real-time job postings, which I implemented.
+
 All code was reviewed, tested, and understood before implementation. The core logic, architecture decisions, and final implementation choices were made by me.
