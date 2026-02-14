@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import json
@@ -26,44 +25,44 @@ st.markdown("Upload your resume and find jobs that match your skills")
 st.sidebar.header("Fetch Jobs")
 
 # Get search parameters from user
-job_query = st.sidebar.text_input("Job Search Query", value="Data Analyst")
-job_location = st.sidebar.text_input("Location", value="Remote")
-number_of_jobs = st.sidebar.slider("Number of Jobs", min_value=5, max_value=50, value=20)
+jobQuery = st.sidebar.text_input("Job Search Query", value="Data Analyst")
+jobLocation = st.sidebar.text_input("Location", value="Remote")
+numberOfJobs = st.sidebar.slider("Number of Jobs", min_value=5, max_value=50, value=20)
 
 # Button to fetch jobs from API
 if st.sidebar.button("Fetch Jobs from API"):
     with st.spinner("Fetching jobs from API"):
         try:
             # Call the API to get jobs
-            jobs_data = fetch_jobs_from_api(query=job_query, location=job_location, num_jobs=number_of_jobs)
+            jobsData = fetch_jobs_from_api(query=jobQuery, location=jobLocation, num_jobs=numberOfJobs)
             
-            if not jobs_data.empty:
+            if not jobsData.empty:
                 # Extract keywords from each job description
-                jobs_data['keywords'] = jobs_data['description'].apply(
+                jobsData['keywords'] = jobsData['description'].apply(
                     lambda description: list(extract_keywords(description)) if pd.notna(description) else []
                 )
                 
                 # Save to CSV file
-                save_jobs_to_csv(jobs_data)
-                st.sidebar.success("Successfully fetched " + str(len(jobs_data)) + " jobs!")
+                save_jobs_to_csv(jobsData)
+                st.sidebar.success("Successfully fetched " + str(len(jobsData)) + " jobs!")
             else:
                 st.sidebar.error("No jobs found. Try different search terms.")
         except Exception as error:
             st.sidebar.error("Error: " + str(error))
 
 # Load existing jobs from file
-jobs_data = load_jobs_from_csv()
+jobsData = load_jobs_from_csv()
 
 # Show job database info in sidebar
-if not jobs_data.empty:
-    st.sidebar.info(str(len(jobs_data)) + " jobs in database")
+if not jobsData.empty:
+    st.sidebar.info(str(len(jobsData)) + " jobs in database")
     
     # Show when jobs were last updated
     if os.path.exists('data/jobs.csv'):
         import time
-        file_modified_time = os.path.getmtime('data/jobs.csv')
-        last_update = time.strftime('%Y-%m-%d %H:%M', time.localtime(file_modified_time))
-        st.sidebar.caption("Last updated: " + last_update)
+        fileModifiedTime = os.path.getmtime('data/jobs.csv')
+        lastUpdate = time.strftime('%Y-%m-%d %H:%M', time.localtime(fileModifiedTime))
+        st.sidebar.caption("Last updated: " + lastUpdate)
 
 # Create three tabs for different sections
 tab1, tab2, tab3 = st.tabs(["Upload Resume", "Match Results", "Job Database"])
@@ -73,76 +72,76 @@ with tab1:
     st.header("Upload Your Resume")
     
     # File uploader for PDF resumes
-    resume_file = st.file_uploader("Choose a PDF file", type=['pdf'])
+    resumeFile = st.file_uploader("Choose a PDF file", type=['pdf'])
     
-    if resume_file is not None:
+    if resumeFile is not None:
         # Save the uploaded file
         with open('data/resume.pdf', 'wb') as file:
-            file.write(resume_file.getbuffer())
+            file.write(resumeFile.getbuffer())
         
         st.success("Resume uploaded successfully!")
         
         # Button to analyze the resume
         if st.button("Analyze My Resume"):
-            if jobs_data.empty:
+            if jobsData.empty:
                 st.error("No jobs in database")
             else:
                 with st.spinner("Analyzing your resume..."):
                     try:
                         # Extract text from the PDF
-                        resume_text = extract_text_from_pdf('data/resume.pdf')
-                        cleaned_resume_text = clean_text(resume_text)
+                        resumeText = extract_text_from_pdf('data/resume.pdf')
+                        cleanedResumeText = clean_text(resumeText)
                         
-                        if not cleaned_resume_text:
+                        if not cleanedResumeText:
                             st.error("Could not extract text from PDF")
                         else:
                             # Extract skills from resume
-                            resume_skills = extract_keywords(cleaned_resume_text)
+                            resumeSkills = extract_keywords(cleanedResumeText)
                             
-                            st.success("Extracted " + str(len(resume_skills)))
+                            st.success("Extracted " + str(len(resumeSkills)))
                             
                             # Show the extracted skills
                             with st.expander("Your Skills"):
-                                st.write(", ".join(sorted(resume_skills)))
+                                st.write(", ".join(sorted(resumeSkills)))
                             
                             # Compare resume against all jobs
-                            all_matches = []
+                            allMatches = []
                             
-                            for index, job_row in jobs_data.iterrows():
-                                job_skills = set(job_row.get('keywords', []))
+                            for index, jobRow in jobsData.iterrows():
+                                jobSkills = set(jobRow.get('keywords', []))
                                 
                                 # Handle case where keywords might be stored as string
-                                if isinstance(job_row.get('keywords'), str):
+                                if isinstance(jobRow.get('keywords'), str):
                                     import ast
                                     try:
-                                        job_skills = set(ast.literal_eval(job_row['keywords']))
+                                        jobSkills = set(ast.literal_eval(jobRow['keywords']))
                                     except:
-                                        job_skills = set()
+                                        jobSkills = set()
                                 
                                 # Calculate how well this job matches the resume
-                                match_score, matched_skills, missing_skills = calculate_match_score(resume_skills, job_skills)
+                                matchScore, matchedSkills, missingSkills = calculate_match_score(resumeSkills, jobSkills)
                                 
                                 # Store the match results
-                                match_result = {
-                                    'job_title': job_row['job_title'],
-                                    'company': job_row['company'],
-                                    'location': job_row['location'],
-                                    'match_score': match_score,
-                                    'matched_keywords': list(matched_skills),
-                                    'missing_keywords': list(missing_skills),
-                                    'job_url': job_row['job_url'],
-                                    'description': job_row['description']
+                                matchResult = {
+                                    'job_title': jobRow['job_title'],
+                                    'company': jobRow['company'],
+                                    'location': jobRow['location'],
+                                    'match_score': matchScore,
+                                    'matched_keywords': list(matchedSkills),
+                                    'missing_keywords': list(missingSkills),
+                                    'job_url': jobRow['job_url'],
+                                    'description': jobRow['description']
                                 }
-                                all_matches.append(match_result)
+                                allMatches.append(matchResult)
                             
                             # Sort jobs by match score (best matches first)
-                            all_matches.sort(key=lambda x: x['match_score'], reverse=True)
+                            allMatches.sort(key=lambda x: x['match_score'], reverse=True)
                             
                             # Save results to file
-                            with open('data/results.json', 'w') as results_file:
-                                json.dump(all_matches, results_file, indent=2)
+                            with open('data/results.json', 'w') as resultsFile:
+                                json.dump(allMatches, resultsFile, indent=2)
                             
-                            st.success("Matched against " + str(len(all_matches)) + " jobs!")
+                            st.success("Matched against " + str(len(allMatches)) + " jobs!")
                             st.info("Go to 'Match Results' tab to see your matches")
                     
                     except Exception as error:
@@ -155,50 +154,50 @@ with tab2:
     # Try to load previous results
     if os.path.exists('data/results.json'):
         try:
-            with open('data/results.json', 'r') as results_file:
-                file_content = results_file.read()
-                if file_content.strip():
-                    match_results = json.loads(file_content)
+            with open('data/results.json', 'r') as resultsFile:
+                fileContent = resultsFile.read()
+                if fileContent.strip():
+                    matchResults = json.loads(fileContent)
                 else:
-                    match_results = []
+                    matchResults = []
         except (json.JSONDecodeError, Exception) as error:
             st.warning("Could not load results: " + str(error))
-            match_results = []
+            matchResults = []
         
-        if match_results:
+        if matchResults:
             # Show top 10 matches
-            top_matches = min(10, len(match_results))
-            st.markdown("### Top " + str(top_matches) + " Matches")
+            topMatches = min(10, len(matchResults))
+            st.markdown("### Top " + str(topMatches) + " Matches")
             
             # Display each match
-            for rank, match in enumerate(match_results[:10], 1):
-                match_percentage = match['match_score']
+            for rank, match in enumerate(matchResults[:10], 1):
+                matchPercentage = match['match_score']
                 
                 # Choose color based on score
-                if match_percentage >= 70:
-                    score_color = "🟢"
-                elif match_percentage >= 50:
-                    score_color = "🟡"
+                if matchPercentage >= 70:
+                    scoreColor = "🟢"
+                elif matchPercentage >= 50:
+                    scoreColor = "🟡"
                 else:
-                    score_color = "🔴"
+                    scoreColor = "🔴"
                 
                 # Create expandable section for each job
-                match_title = score_color + " #" + str(rank) + " - " + match['job_title'] + " at " + match['company'] + " (" + str(match_percentage) + "%)"
+                matchTitle = scoreColor + " #" + str(rank) + " - " + match['job_title'] + " at " + match['company'] + " (" + str(matchPercentage) + "%)"
                 
-                with st.expander(match_title):
+                with st.expander(matchTitle):
                     # Split into two columns
-                    left_column, right_column = st.columns([2, 1])
+                    leftColumn, rightColumn = st.columns([2, 1])
                     
-                    with left_column:
-                        st.write("**Company:** " + match['company'])
-                        st.write("**Location:** " + match['location'])
-                        st.write("**Match Score:** " + str(match_percentage) + "%")
+                    with leftColumn:
+                        st.write("**Company:** " + str(match['company']))
+                        st.write("**Location:** " + str(match['location']))
+                        st.write("**Match Score:** " + str(matchPercentage) + "%")
                         
                         if match.get('job_url'):
                             st.markdown("[Apply Here](" + match['job_url'] + ")")
                     
-                    with right_column:
-                        st.metric("ATS Score", str(match_percentage) + "%")
+                    with rightColumn:
+                        st.metric("ATS Score", str(matchPercentage) + "%")
                     
                     # Show matched skills
                     st.write("**Matched Skills:**")
@@ -216,8 +215,8 @@ with tab2:
                     
                     # Show job description preview
                     st.write("**Job Description (preview):**")
-                    description_preview = match['description'][:300] + "..."
-                    st.write(description_preview)
+                    descriptionPreview = match['description'][:300] + "..."
+                    st.write(descriptionPreview)
         else:
             st.info("No results yet. Upload a resume and analyze it")
     else:
@@ -227,23 +226,23 @@ with tab2:
 with tab3:
     st.header("Job Database")
     
-    if not jobs_data.empty:
-        st.write("Total jobs: " + str(len(jobs_data)))
+    if not jobsData.empty:
+        st.write("Total jobs: " + str(len(jobsData)))
         
         # Show jobs in a table
-        table_data = jobs_data[['job_title', 'company', 'location']].copy()
-        st.dataframe(table_data, use_container_width=True)
+        tableData = jobsData[['job_title', 'company', 'location']].copy()
+        st.dataframe(tableData, use_container_width=True)
         
         # Option to view individual job details
         if st.checkbox("Show sample job details"):
-            job_index = st.selectbox("Select job index", range(len(jobs_data)))
-            selected_job = jobs_data.iloc[job_index]
+            jobIndex = st.selectbox("Select job index", range(len(jobsData)))
+            selectedJob = jobsData.iloc[jobIndex]
             
-            st.subheader(selected_job['job_title'])
-            st.write("**Company:** " + selected_job['company'])
-            st.write("**Location:** " + selected_job['location'])
+            st.subheader(selectedJob['job_title'])
+            st.write("**Company:** " + str(selectedJob['company']))
+            st.write("**Location:** " + str(selectedJob['location']))
             st.write("**Description:**")
-            job_description = selected_job['description'][:500] + "..."
-            st.write(job_description)
+            jobDescription = selectedJob['description'][:500] + "..."
+            st.write(jobDescription)
     else:
         st.info("No jobs in database. Fetch jobs using the sidebar")
